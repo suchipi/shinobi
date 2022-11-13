@@ -27,6 +27,8 @@ declare function declareOrAppend(
   sep?: string
 ): void;
 
+declare function getVar(name: string): string | null;
+
 declare function rule(
   name: string,
   opts: {

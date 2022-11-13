@@ -148,9 +148,19 @@ export function makeApi(state: State) {
     return results;
   }
 
+  function getVar(name: string): string | null {
+    const maybeVar = vars[name];
+    if (maybeVar) {
+      return maybeVar.value;
+    } else {
+      return null;
+    }
+  }
+
   return {
     declare,
     declareOrAppend,
+    getVar,
     rule,
     build,
     rel,
