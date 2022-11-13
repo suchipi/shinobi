@@ -1,0 +1,12 @@
+{
+    "include": ["**/*.ts"],
+
+    "compilerOptions": {
+        "outDir": "dist",
+
+        "lib": ["ES2020"],
+
+        "strictNullChecks": true,
+        "esModuleInterop": true
+    }
+}
