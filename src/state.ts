@@ -1,36 +1,22 @@
 import { Variable, Rule, Build } from "./types";
-import { renderStringWithVars } from "./util";
 
 export type State = ReturnType<typeof makeState>;
-
-export enum WriteMode {
-  VARS = 1,
-  RULES = 2,
-  BUILDS = 4,
-}
 
 export function makeState() {
   const vars: Record<string, Variable> = {};
   const rules: Record<string, Rule> = {};
   const builds: Array<Build> = [];
 
-  const writeMode = 0;
-
   return {
-    public: {
-      vars,
-      rules,
-      builds,
-    },
-    private: {
-      currentFile: null as string | null,
-      writeMode,
-    },
+    vars,
+    rules,
+    builds,
+    currentFile: null as string | null,
   };
 }
 
 export function renderState(state: State): string {
-  const { vars, builds, rules } = state.public;
+  const { vars, builds, rules } = state;
 
   const outputLines: Array<string> = [];
 
@@ -44,10 +30,18 @@ export function renderState(state: State): string {
   for (const rule of Object.values(rules)) {
     outputLines.push(`# rule '${rule.name}' from ${rule.source}`);
     outputLines.push(`rule ${rule.name}`);
-    outputLines.push(`  command = ${renderStringWithVars(rule.command)}`);
+    outputLines.push(
+      `  command = ${
+        Array.isArray(rule.command) ? rule.command.join(" ") : rule.command
+      }`
+    );
     if (rule.description) {
       outputLines.push(
-        `  description = ${renderStringWithVars(rule.description)}`
+        `  description = ${
+          Array.isArray(rule.description)
+            ? rule.description.join(" ")
+            : rule.description
+        }`
       );
     }
   }
@@ -56,9 +50,7 @@ export function renderState(state: State): string {
 
   for (const build of builds) {
     outputLines.push(`# build for '${build.output}' from ${build.source}`);
-    let line = `build ${build.output}: ${build.rule.name} ${build.inputs.join(
-      " "
-    )}`;
+    let line = `build ${build.output}: ${build.rule} ${build.inputs.join(" ")}`;
     if (build.implicitInputs.length > 0) {
       line += "| " + build.implicitInputs.join(" ");
     }

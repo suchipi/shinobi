@@ -1,7 +1,7 @@
 import { State } from "./state";
 
 export function addPrimordials(state: State) {
-  const vars = state.public.vars;
+  const vars = state.vars;
 
   // Synthetic variables for rules to use
   vars.in = { name: "in", value: "", source: "builtin" };
@@ -16,7 +16,7 @@ export function addPrimordials(state: State) {
 }
 
 export function cleanPrimordials(state: State) {
-  const vars = state.public.vars;
+  const vars = state.vars;
 
   // Only present so rules can use them
   delete vars.in;

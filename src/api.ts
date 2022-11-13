@@ -1,28 +1,27 @@
 import path from "path";
 import globby from "globby";
-import { State, WriteMode } from "./state";
-import { Rule, StringWithVars } from "./types";
+import { State } from "./state";
 
 export type Api = ReturnType<typeof makeApi>;
 
 export function makeApi(state: State) {
-  const { vars, builds, rules } = state.public;
+  const { vars, builds, rules } = state;
 
   function declare(name: string, value: string) {
-    const mode = state.private.writeMode;
-    if (!(mode & WriteMode.VARS)) return;
+    if (vars[name]) {
+      throw new Error(
+        `Attempt to redefine variable '${name}' in '${state.currentFile}'. Variable was previously defined in '${vars[name].source}'.`
+      );
+    }
 
     vars[name] = {
       name,
       value,
-      source: state.private.currentFile!,
+      source: state.currentFile!,
     };
   }
 
   function declareOrAppend(name: string, value: string, sep: string = " ") {
-    const mode = state.private.writeMode;
-    if (!(mode & WriteMode.VARS)) return;
-
     const existing = vars[name];
     if (existing) {
       existing.value += sep + value;
@@ -33,44 +32,100 @@ export function makeApi(state: State) {
 
   function rule(
     name: string,
-    opts: { command: StringWithVars; description?: StringWithVars }
+    opts: {
+      command: string | Array<string>;
+      description?: string | Array<string>;
+    }
   ) {
-    const mode = state.private.writeMode;
-
-    if (!(mode & WriteMode.RULES)) return;
-
     if (rules[name]) {
-      throw new Error(`There's already a rule named ${name}`);
+      throw new Error(
+        `Attempt to redefine rule '${name}' in '${state.currentFile}'. Rule was previously defined in '${rules[name].source}'.`
+      );
+    }
+
+    if (!opts.command) {
+      throw new Error(
+        `No command specified for rule '${name}'. Command is required.`
+      );
+    }
+
+    if (Array.isArray(opts.command)) {
+      if (opts.command.some((entry) => entry == null)) {
+        throw new Error(
+          `null or undefined command component specified. This is not allowed. Received: ${JSON.stringify(
+            opts.command
+          )}`
+        );
+      }
+    }
+
+    if (Array.isArray(opts.description)) {
+      if (opts.description.some((entry) => entry == null)) {
+        throw new Error(
+          `null or undefined description component specified. This is not allowed. Received: ${JSON.stringify(
+            opts.description
+          )}`
+        );
+      }
     }
 
     rules[name] = {
       name,
       command: opts.command,
       description: opts.description,
-      source: state.private.currentFile!,
+      source: state.currentFile!,
     };
   }
 
   function build(
     output: string,
-    rule: Rule,
+    rule: string,
     inputs: Array<string>,
     implicitInputs: Array<string> = []
   ) {
-    const mode = state.private.writeMode;
-    if (!(mode & WriteMode.BUILDS)) return;
+    if (typeof output !== "string") {
+      throw new Error("output should be a string");
+    }
+
+    if (rule == null) {
+      throw new Error("rule was null or undefined");
+    }
+
+    if (!Array.isArray(inputs)) {
+      throw new Error("inputs should be an array");
+    }
+
+    if (inputs.some((input) => typeof input !== "string")) {
+      throw new Error(
+        `an element in the inputs array wasn't a string. received: ${JSON.stringify(
+          inputs
+        )}`
+      );
+    }
+
+    if (!Array.isArray(implicitInputs)) {
+      throw new Error("implicitInputs should be an array");
+    }
+
+    if (implicitInputs.some((input) => typeof input !== "string")) {
+      throw new Error(
+        `an element in the implicitInputs array wasn't a string. received: ${JSON.stringify(
+          implicitInputs
+        )}`
+      );
+    }
 
     builds.push({
       output,
       rule,
       inputs,
       implicitInputs,
-      source: state.private.currentFile!,
+      source: state.currentFile!,
     });
   }
 
   function rel(somePath?: string): string {
-    const dir = path.dirname(state.private.currentFile!);
+    const dir = path.dirname(state.currentFile!);
     if (somePath) {
       return path.resolve(dir, "./" + somePath);
     } else {

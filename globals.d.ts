@@ -1,26 +1,23 @@
-declare type StringWithVars = string | Array<string | Variable>;
-
 declare type Variable = {
   name: string;
   value: string;
+  source: string;
 };
 
 declare type Rule = {
   name: string;
-  command: StringWithVars;
-  description?: StringWithVars;
+  command: string | Array<string>;
+  description?: string | Array<string>;
+  source: string;
 };
 
 declare type Build = {
   output: string;
-  rule: Rule;
+  rule: string;
   inputs: Array<string>;
   implicitInputs: Array<string>;
+  source: string;
 };
-
-declare var vars: Record<string, Variable>;
-declare var rules: Record<string, Rule>;
-declare var builds: Array<Build>;
 
 declare function declare(name: string, value: string): void;
 
@@ -32,12 +29,15 @@ declare function declareOrAppend(
 
 declare function rule(
   name: string,
-  opts: { command: StringWithVars; description?: StringWithVars }
+  opts: {
+    command: string | Array<string>;
+    description?: string | Array<string>;
+  }
 ): void;
 
 declare function build(
   output: string,
-  rule: Rule,
+  rule: string,
   inputs: Array<string>,
   implicitInputs?: Array<string>
 ): void;
