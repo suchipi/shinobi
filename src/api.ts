@@ -1,4 +1,5 @@
 import path from "path";
+import globby from "globby";
 import { State, WriteMode } from "./state";
 import { Rule, StringWithVars } from "./types";
 
@@ -87,6 +88,11 @@ export function makeApi(state: State) {
 
   const env = process.env;
 
+  function glob(patterns: string | Array<string>, options?: any) {
+    const results = globby.sync(patterns, options);
+    return results;
+  }
+
   return {
     declare,
     declareOrAppend,
@@ -95,5 +101,6 @@ export function makeApi(state: State) {
     rel,
     builddir,
     env,
+    glob,
   };
 }
