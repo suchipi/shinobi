@@ -1,12 +1,24 @@
 #!/usr/bin/env node
+import makeModuleEnv from "make-module-env";
+import path from "path";
 import { makeState, WriteMode, renderState } from "./state";
 import { makeApi } from "./api";
 import { addPrimordials, cleanPrimordials } from "./primordials";
 import { times } from "./util";
 
+const modEnv = makeModuleEnv(path.join(process.cwd(), "<shinobi cli>"));
+
 function clearRequireCache() {
   for (const key in require.cache) {
-    delete require.cache[key];
+    delete modEnv.require.cache[key];
+  }
+}
+
+function load(file: string) {
+  if (path.isAbsolute(file)) {
+    modEnv.require(file);
+  } else {
+    modEnv.require("./" + file);
   }
 }
 
@@ -23,7 +35,7 @@ function main(files: Array<string>) {
     for (const file of files) {
       state.private.writeMode = WriteMode.VARS;
       state.private.currentFile = file;
-      require(file);
+      load(file);
     }
 
     clearRequireCache();
@@ -33,7 +45,7 @@ function main(files: Array<string>) {
   for (const file of files) {
     state.private.writeMode = WriteMode.RULES;
     state.private.currentFile = file;
-    require(file);
+    load(file);
   }
   clearRequireCache();
 
@@ -41,7 +53,7 @@ function main(files: Array<string>) {
   for (const file of files) {
     state.private.writeMode = WriteMode.BUILDS;
     state.private.currentFile = file;
-    require(file);
+    load(file);
   }
 
   cleanPrimordials(state);

@@ -71,7 +71,7 @@ export function makeApi(state: State) {
   function rel(somePath?: string): string {
     const dir = path.dirname(state.private.currentFile!);
     if (somePath) {
-      return path.resolve("./" + somePath, dir);
+      return path.resolve(dir, "./" + somePath);
     } else {
       return dir;
     }
