@@ -3,7 +3,7 @@ import makeModuleEnv from "make-module-env";
 import path from "path";
 import { makeState, renderState } from "./state";
 import { makeApi } from "./api";
-import { addPrimordials, cleanPrimordials } from "./primordials";
+import { addPrimordials } from "./primordials";
 
 const modEnv = makeModuleEnv(path.join(process.cwd(), "<shinobi cli>"));
 
@@ -27,8 +27,6 @@ function main(files: Array<string>) {
     state.currentFile = file;
     load(file);
   }
-
-  cleanPrimordials(state);
 
   const output = renderState(state);
   console.log(output);

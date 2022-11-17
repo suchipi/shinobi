@@ -52,11 +52,15 @@ export function renderState(state: State): string {
     outputLines.push(`# build for '${build.output}' from ${build.source}`);
     let line = `build ${build.output}: ${build.rule} ${build.inputs.join(" ")}`;
     if (build.implicitInputs.length > 0) {
-      line += "| " + build.implicitInputs.join(" ");
+      line += " | " + build.implicitInputs.join(" ");
     }
 
     outputLines.push(line);
+
+    for (const [name, value] of Object.entries(build.ruleVariables)) {
+      outputLines.push(`  ${name} = ${value}`);
+    }
   }
 
-  return outputLines.join("\n");
+  return outputLines.join("\n") + "\n";
 }

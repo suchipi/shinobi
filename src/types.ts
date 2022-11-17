@@ -16,5 +16,6 @@ export type Build = {
   rule: string;
   inputs: Array<string>;
   implicitInputs: Array<string>;
+  ruleVariables: { [name: string]: string | number | boolean };
   source: string;
 };

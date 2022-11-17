@@ -8,6 +8,12 @@ export function makeApi(state: State) {
   const { vars, builds, rules } = state;
 
   function declare(name: string, value: string) {
+    if (name === "in" || name === "out") {
+      throw new Error(
+        `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`
+      );
+    }
+
     if (vars[name]) {
       throw new Error(
         `Attempt to redefine variable '${name}' in '${state.currentFile}'. Variable was previously defined in '${vars[name].source}'.`
@@ -22,6 +28,12 @@ export function makeApi(state: State) {
   }
 
   function declareOrAppend(name: string, value: string, sep: string = " ") {
+    if (name === "in" || name === "out") {
+      throw new Error(
+        `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`
+      );
+    }
+
     const existing = vars[name];
     if (existing) {
       existing.value += sep + value;
@@ -77,12 +89,21 @@ export function makeApi(state: State) {
     };
   }
 
-  function build(
-    output: string,
-    rule: string,
-    inputs: Array<string>,
-    implicitInputs: Array<string> = []
-  ) {
+  function build(config: {
+    output: string;
+    rule: string;
+    inputs: Array<string>;
+    implicitInputs?: Array<string>;
+    ruleVariables?: { [name: string]: string | number | boolean };
+  }) {
+    const {
+      output,
+      rule,
+      inputs,
+      implicitInputs = [],
+      ruleVariables = {},
+    } = config;
+
     if (typeof output !== "string") {
       throw new Error("output should be a string");
     }
@@ -120,6 +141,7 @@ export function makeApi(state: State) {
       rule,
       inputs,
       implicitInputs,
+      ruleVariables,
       source: state.currentFile!,
     });
   }
