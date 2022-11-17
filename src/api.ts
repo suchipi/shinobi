@@ -4,10 +4,53 @@ import { State } from "./state";
 
 export type Api = ReturnType<typeof makeApi>;
 
+export type Value =
+  | string
+  | boolean
+  | number
+  | undefined
+  | null
+  | Array<string | boolean | number | undefined | null>;
+
+function stringifyValue(input: Value): null | string {
+  if (input == null) {
+    return null;
+  } else if (Array.isArray(input)) {
+    return input.filter((value) => value != null).join(" ");
+  } else {
+    return String(input);
+  }
+}
+
+function arrayifyValue(input: Value): Array<string> {
+  if (Array.isArray(input)) {
+    return input
+      .map((value) => stringifyValue(value))
+      .filter((value) => value != null) as Array<string>;
+  } else {
+    const stringified = stringifyValue(input);
+    if (stringified == null) {
+      return [];
+    } else {
+      return [stringified];
+    }
+  }
+}
+
+function objectifyValues(input: { [key: string]: Value }): {
+  [key: string]: string;
+} {
+  return Object.fromEntries(
+    Object.entries(input)
+      .map(([key, value]) => [key, stringifyValue(value)])
+      .filter(([key, value]) => value != null)
+  );
+}
+
 export function makeApi(state: State) {
   const { vars, builds, rules } = state;
 
-  function declare(name: string, value: string) {
+  function declare(name: string, value: Value) {
     if (name === "in" || name === "out") {
       throw new Error(
         `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`
@@ -22,69 +65,47 @@ export function makeApi(state: State) {
 
     vars[name] = {
       name,
-      value,
+      value: stringifyValue(value) ?? "",
       source: state.currentFile!,
     };
   }
 
-  function declareOrAppend(name: string, value: string, sep: string = " ") {
+  function declareOrAppend(name: string, value: Value, sep: string = " ") {
     if (name === "in" || name === "out") {
       throw new Error(
         `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`
       );
     }
 
+    const stringified = stringifyValue(value);
     const existing = vars[name];
     if (existing) {
-      existing.value += sep + value;
+      if (stringified) {
+        existing.value += sep + stringified;
+      } else {
+        // Don't append anything
+      }
     } else {
       declare(name, value);
     }
   }
 
-  function rule(
-    name: string,
-    opts: {
-      command: string | Array<string>;
-      description?: string | Array<string>;
-    }
-  ) {
+  function rule(name: string, properties: { [key: string]: Value }) {
     if (rules[name]) {
       throw new Error(
         `Attempt to redefine rule '${name}' in '${state.currentFile}'. Rule was previously defined in '${rules[name].source}'.`
       );
     }
 
-    if (!opts.command) {
+    if (!properties.command) {
       throw new Error(
         `No command specified for rule '${name}'. Command is required.`
       );
     }
 
-    if (Array.isArray(opts.command)) {
-      if (opts.command.some((entry) => entry == null)) {
-        throw new Error(
-          `null or undefined command component specified. This is not allowed. Received: ${JSON.stringify(
-            opts.command
-          )}`
-        );
-      }
-    }
-
-    if (Array.isArray(opts.description)) {
-      if (opts.description.some((entry) => entry == null)) {
-        throw new Error(
-          `null or undefined description component specified. This is not allowed. Received: ${JSON.stringify(
-            opts.description
-          )}`
-        );
-      }
-    }
-
     rules[name] = {
       name,
-      command: opts.command,
-      description: opts.description,
+      properties: objectifyValues(properties),
       source: state.currentFile!,
     };
   }
@@ -92,9 +113,9 @@ export function makeApi(state: State) {
   function build(config: {
     output: string;
     rule: string;
-    inputs: Array<string>;
-    implicitInputs?: Array<string>;
-    ruleVariables?: { [name: string]: string | number | boolean };
+    inputs: Value;
+    implicitInputs?: Value;
+    ruleVariables?: { [name: string]: Value };
   }) {
     const {
       output,
@@ -112,36 +133,12 @@ export function makeApi(state: State) {
       throw new Error("rule was null or undefined");
     }
 
-    if (!Array.isArray(inputs)) {
-      throw new Error("inputs should be an array");
-    }
-
-    if (inputs.some((input) => typeof input !== "string")) {
-      throw new Error(
-        `an element in the inputs array wasn't a string. received: ${JSON.stringify(
-          inputs
-        )}`
-      );
-    }
-
-    if (!Array.isArray(implicitInputs)) {
-      throw new Error("implicitInputs should be an array");
-    }
-
-    if (implicitInputs.some((input) => typeof input !== "string")) {
-      throw new Error(
-        `an element in the implicitInputs array wasn't a string. received: ${JSON.stringify(
-          implicitInputs
-        )}`
-      );
-    }
-
     builds.push({
       output,
       rule,
-      inputs,
-      implicitInputs,
-      ruleVariables,
+      inputs: arrayifyValue(inputs),
+      implicitInputs: arrayifyValue(implicitInputs),
+      ruleVariables: objectifyValues(ruleVariables),
       source: state.currentFile!,
     });
   }

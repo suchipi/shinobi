@@ -7,7 +7,8 @@
     "shinobi": "dist/index.js"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc && chmod +x dist/index.js"
+    "build": "rm -rf dist && tsc && chmod +x dist/index.js",
+    "test": "vitest"
   },
   "repository": "suchipi/shinobi",
   "keywords": [

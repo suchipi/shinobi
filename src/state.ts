@@ -30,19 +30,9 @@ export function renderState(state: State): string {
   for (const rule of Object.values(rules)) {
     outputLines.push(`# rule '${rule.name}' from ${rule.source}`);
     outputLines.push(`rule ${rule.name}`);
-    outputLines.push(
-      `  command = ${
-        Array.isArray(rule.command) ? rule.command.join(" ") : rule.command
-      }`
-    );
-    if (rule.description) {
-      outputLines.push(
-        `  description = ${
-          Array.isArray(rule.description)
-            ? rule.description.join(" ")
-            : rule.description
-        }`
-      );
+
+    for (const [key, value] of Object.entries(rule.properties)) {
+      outputLines.push(`  ${key} = ${value}`);
     }
   }
 

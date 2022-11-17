@@ -6,8 +6,7 @@ export type Variable = {
 
 export type Rule = {
   name: string;
-  command: string | Array<string>;
-  description?: string | Array<string>;
+  properties: { [key: string]: string };
   source: string;
 };
 
