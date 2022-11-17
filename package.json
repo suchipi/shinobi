@@ -1,6 +1,6 @@
 {
   "name": "@suchipi/shinobi",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Generate ninja build files from js scripts",
   "main": "dist/index.js",
   "bin": {
