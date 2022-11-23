@@ -26,8 +26,9 @@ declare type Value =
  *
  * @param name The name of the variable, which will be on the left side of the equals sign.
  * @param value The value of the variable, which will be on the right side of the equals sign.
+ * @returns The name of the variable, as passed in.
  */
-declare function declare(name: string, value: Value): void;
+declare function declare(name: string, value: Value): string;
 
 /**
  * Adds or modifies a variable declaration in the final build.ninja.
@@ -40,12 +41,13 @@ declare function declare(name: string, value: Value): void;
  * @param name The name of the variable, which will be on the left side of the equals sign.
  * @param value If the variable already exists, this will be appended to end. Otherwise, the variable will be defined with this value.
  * @param sep If the variable already exists, this string will be used to join `value` to the end of the variable's existing value. If unspecified, defaults to `" "`.
+ * @returns The name of the variable, as passed in.
  */
 declare function declareOrAppend(
   name: string,
   value: Value,
   sep?: string
-): void;
+): string;
 
 /**
  * Read the value of a declared variable in the final build.ninja, as defined thus far.
@@ -63,6 +65,7 @@ declare function getVar(name: string): string | null;
  *
  * @param name The name of the rule
  * @param properties Various values relating to the rule's definition.
+ * @returns The name of the rule, as passed in.
  */
 declare function rule(
   name: string,
@@ -176,11 +179,13 @@ declare function rule(
      */
     rspfile_content?: Value;
   }
-): void;
+): string;
 
 /**
  * Add instructions to the final build.ninja that instruct ninja how to build
  * the file at `output`.
+ *
+ * @returns The output filepath, as passed in via `config.output`.
  */
 declare function build(config: {
   /** The file that will be created. */
@@ -197,7 +202,7 @@ declare function build(config: {
 
   /** Any additional variables to put into the rule's scope when building its command-line. The rule can access these by name using `$`, the same way it does with `$in` and `$out`. */
   ruleVariables?: { [name: string]: Value };
-}): void;
+}): string;
 
 /**
  * Resolves the given `path` into an absolute path relative to the containing

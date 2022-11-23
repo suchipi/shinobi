@@ -68,6 +68,8 @@ export function makeApi(state: State) {
       value: stringifyValue(value) ?? "",
       source: state.currentFile!,
     };
+
+    return name;
   }
 
   function declareOrAppend(name: string, value: Value, sep: string = " ") {
@@ -88,6 +90,8 @@ export function makeApi(state: State) {
     } else {
       declare(name, value);
     }
+
+    return name;
   }
 
   function rule(name: string, properties: { [key: string]: Value }) {
@@ -108,6 +112,8 @@ export function makeApi(state: State) {
       properties: objectifyValues(properties),
       source: state.currentFile!,
     };
+
+    return name;
   }
 
   function build(config: {
@@ -141,6 +147,8 @@ export function makeApi(state: State) {
       ruleVariables: objectifyValues(ruleVariables),
       source: state.currentFile!,
     });
+
+    return output;
   }
 
   function rel(somePath?: string): string {
