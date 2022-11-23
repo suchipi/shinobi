@@ -1,12 +1,9 @@
 import { expect, test } from "vitest";
-import { makeState } from "../src/state";
-import { makeApi } from "../src/api";
-import { addPrimordials } from "../src/primordials";
+import { Shinobi } from "../src";
 
 test("basic test", () => {
-  const state = makeState();
-  const api = makeApi(state);
-  addPrimordials(state);
+  const shinobi = new Shinobi();
+  const { state, api } = shinobi;
 
   const {
     build,

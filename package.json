@@ -4,10 +4,10 @@
   "description": "Generate ninja build files from js scripts",
   "main": "dist/index.js",
   "bin": {
-    "shinobi": "dist/index.js"
+    "shinobi": "dist/cli.js"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc && chmod +x dist/index.js",
+    "build": "rm -rf dist && tsc && chmod +x dist/cli.js",
     "test": "vitest"
   },
   "repository": "suchipi/shinobi",
