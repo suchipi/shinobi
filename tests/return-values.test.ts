@@ -10,6 +10,7 @@ test("basic test", () => {
     builddir,
     declare,
     declareOrAppend,
+    overrideDeclaration,
     env,
     getVar,
     glob,
@@ -24,6 +25,9 @@ test("basic test", () => {
 
   const libs = declareOrAppend("libs", "-lpthread");
   expect(libs).toBe("libs");
+
+  const ccVar2 = overrideDeclaration("cc", "clang");
+  expect(ccVar2).toBe("cc");
 
   const ccRule = rule("cc", {
     command: "$cc $cflags $in -o $out",

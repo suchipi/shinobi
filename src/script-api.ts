@@ -72,6 +72,28 @@ export function makeApi(state: State) {
     return name;
   }
 
+  function overrideDeclaration(name: string, value: Value) {
+    if (name === "in" || name === "out") {
+      throw new Error(
+        `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`
+      );
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(vars, name)) {
+      throw new Error(
+        `Attempting to override declaration of variable '${name}' in '${state.currentFile}', but variable was never previously defined. Use 'declare' instead.`
+      );
+    }
+
+    vars[name] = {
+      name,
+      value: stringifyValue(value) ?? "",
+      source: state.currentFile!,
+    };
+
+    return name;
+  }
+
   function declareOrAppend(name: string, value: Value, sep: string = " ") {
     if (name === "in" || name === "out") {
       throw new Error(
@@ -186,6 +208,7 @@ export function makeApi(state: State) {
 
   return {
     declare,
+    overrideDeclaration,
     declareOrAppend,
     getVar,
     rule,

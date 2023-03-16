@@ -24,11 +24,26 @@ declare type Value =
  *
  * Then you could reference that in a rule by writing "$some_name".
  *
+ * NOTE: To change a variable value later, use either {@link declareOrAppend}
+ * or {@link overrideDeclaration}. Calling `declare` twice with the same variable
+ * name will throw an error.
+ *
  * @param name The name of the variable, which will be on the left side of the equals sign.
  * @param value The value of the variable, which will be on the right side of the equals sign.
  * @returns The name of the variable, as passed in.
  */
 declare function declare(name: string, value: Value): string;
+
+/**
+ * Completely replaces the value of a previously-declared variable.
+ *
+ * Similar to {@link declare}, but only works for already-declared variables.
+ *
+ * @param name The name of the variable, which will be on the left side of the equals sign.
+ * @param value The value of the variable, which will be on the right side of the equals sign.
+ * @returns The name of the variable, as passed in.
+ */
+declare function overrideDeclaration(name: string, value: Value): string;
 
 /**
  * Adds or modifies a variable declaration in the final build.ninja.

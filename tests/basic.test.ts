@@ -10,6 +10,7 @@ test("basic test", () => {
     builddir,
     declare,
     declareOrAppend,
+    overrideDeclaration,
     env,
     getVar,
     glob,
@@ -25,8 +26,18 @@ test("basic test", () => {
   declare("ldflags", "");
   declare("libs", "-lm");
 
+  expect(getVar("cflags")).toBe("-Wall");
+
   declareOrAppend("libs", "-lpthread");
   declareOrAppend("cflags", "-g");
+
+  declare("dotexe", ".exe");
+
+  expect(getVar("dotexe")).toBe(".exe");
+
+  overrideDeclaration("dotexe", "");
+
+  expect(getVar("dotexe")).toBe("");
 
   expect(getVar("cflags")).toBe("-Wall -g");
 
@@ -102,6 +113,8 @@ test("basic test", () => {
     ldflags = 
     # variable 'libs' from /tmp/blah.test/something.js
     libs = -lm -lpthread
+    # variable 'dotexe' from /tmp/blah.test/something.js
+    dotexe = 
 
     # rule 'cc' from /tmp/blah.test/something.js
     rule cc
