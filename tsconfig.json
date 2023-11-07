@@ -3,6 +3,7 @@
 
   "compilerOptions": {
     "outDir": "dist",
+    "skipLibCheck": true,
 
     "lib": ["ES2020"],
 

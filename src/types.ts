@@ -8,6 +8,7 @@ export type Rule = {
   name: string;
   properties: { [key: string]: string };
   source: string;
+  implicitInputs: Array<string>;
 };
 
 export type Build = {

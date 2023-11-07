@@ -34,6 +34,12 @@ export function renderState(state: State): string {
     for (const [key, value] of Object.entries(rule.properties)) {
       outputLines.push(`  ${key} = ${value}`);
     }
+
+    if (rule.implicitInputs.length > 0) {
+      outputLines.push(
+        `  # with implicit inputs: ${rule.implicitInputs.join(" ")}`
+      );
+    }
   }
 
   outputLines.push("");
@@ -41,8 +47,15 @@ export function renderState(state: State): string {
   for (const build of builds) {
     outputLines.push(`# build for '${build.output}' from ${build.source}`);
     let line = `build ${build.output}: ${build.rule} ${build.inputs.join(" ")}`;
-    if (build.implicitInputs.length > 0) {
-      line += " | " + build.implicitInputs.join(" ");
+
+    const ruleForBuild = rules[build.rule];
+    const implicitInputs = [
+      ...build.implicitInputs,
+      ...ruleForBuild.implicitInputs,
+    ];
+
+    if (implicitInputs.length > 0) {
+      line += " | " + implicitInputs.join(" ");
     }
 
     outputLines.push(line);

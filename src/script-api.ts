@@ -129,9 +129,12 @@ export function makeApi(state: State) {
       );
     }
 
+    const { implicitInputs, ...others } = properties;
+
     rules[name] = {
       name,
-      properties: objectifyValues(properties),
+      properties: objectifyValues(others),
+      implicitInputs: arrayifyValue(implicitInputs),
       source: state.currentFile!,
     };
 

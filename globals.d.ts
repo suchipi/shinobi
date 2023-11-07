@@ -193,6 +193,12 @@ declare function rule(
      * ```
      */
     rspfile_content?: Value;
+
+    /**
+     * Files which should be considered implicit inputs to all builds which use
+     * this rule.
+     */
+    implicitInputs?: Value;
   }
 ): string;
 
