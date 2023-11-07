@@ -7,7 +7,7 @@
     "shinobi": "dist/cli.js"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc && chmod +x dist/cli.js",
+    "build": "rm -rf dist && tsc && chmod +x dist/cli.js && rm -rf dist/tests",
     "test": "vitest"
   },
   "repository": "suchipi/shinobi",
@@ -20,11 +20,14 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^18.11.9",
+    "first-base": "^1.3.0",
+    "path-less-traveled": "^2.0.0",
     "prettier": "^2.7.1",
     "typescript": "^4.8.4",
     "vitest": "^0.25.2"
   },
   "dependencies": {
+    "clefairy": "^0.4.0",
     "globby": "^11.1.0",
     "make-module-env": "^1.0.1"
   }

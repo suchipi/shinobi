@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { Shinobi } from "../src";
+import { Shinobi } from "..";
 
 test("basic test", () => {
   const shinobi = new Shinobi();

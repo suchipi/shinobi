@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
-import { Shinobi } from "../src";
+import { Shinobi } from "..";
 
-test("basic test", () => {
+test("return values", () => {
   const shinobi = new Shinobi();
   const { state, api } = shinobi;
 
