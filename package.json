@@ -29,6 +29,6 @@
   "dependencies": {
     "clefairy": "^0.4.0",
     "globby": "^11.1.0",
-    "make-module-env": "^1.0.1"
+    "make-module-env": "^1.1.2"
   }
 }
