@@ -3,12 +3,17 @@
     "node_modules/@suchipi/quickjs/build/dts/**/*.d.ts",
     "src/**/*.ts"
   ],
+  "exclude": [
+    // not converted yet
+    "src/tests"
+  ],
 
   "compilerOptions": {
     "outDir": "dist",
     "skipLibCheck": true,
 
     "lib": ["ES2022"],
+    "target": "ES2022",
     "module": "ES2022",
 
     "strictNullChecks": true,

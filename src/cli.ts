@@ -1,3 +1,4 @@
+#!/usr/bin/env quickjs-run
 import * as std from "quickjs:std";
 import { Shinobi } from "./api";
 
