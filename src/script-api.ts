@@ -1,5 +1,6 @@
-import path from "path";
-import globby from "globby";
+import { Path } from "./from-yavascript/Path";
+import { env } from "./from-yavascript/env";
+import { glob as ysGlob } from "./from-yavascript/glob";
 import { State } from "./state";
 
 export type Api = ReturnType<typeof makeApi>;
@@ -177,27 +178,36 @@ export function makeApi(state: State) {
   }
 
   function rel(somePath?: string): string {
-    const dir = path.dirname(state.currentFile!);
+    const dir = new Path(state.currentFile!).dirname();
     if (somePath) {
-      return path.resolve(dir, "./" + somePath);
+      return dir
+        .concat("./" + somePath)
+        .normalize()
+        .toString();
     } else {
-      return dir;
+      return dir.toString();
     }
   }
 
   function builddir(somePath?: string): string {
     if (somePath) {
-      return path.join("$builddir", somePath);
+      return new Path("$builddir", somePath).toString();
     } else {
       return "$builddir";
     }
   }
 
-  const env = process.env;
+  function glob(
+    patterns: string | Array<string>,
+    options: { cwd?: string; dir?: string; followSymlinks?: boolean } = {}
+  ): Array<string> {
+    // small backwards-compat with globby options
+    if (options.cwd && !options.dir) {
+      options.dir = options.cwd;
+    }
 
-  function glob(patterns: string | Array<string>, options?: any) {
-    const results = globby.sync(patterns, options);
-    return results;
+    const results = ysGlob(patterns, options);
+    return results.map((result) => result.toString());
   }
 
   function getVar(name: string): string | null {
