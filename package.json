@@ -3,11 +3,8 @@
   "version": "1.0.1",
   "description": "Generate ninja build files from js scripts",
   "main": "dist/index.js",
-  "bin": {
-    "shinobi": "dist/cli.js"
-  },
   "scripts": {
-    "build": "rm -rf dist && tsc && chmod +x dist/cli.js && rm -rf dist/tests",
+    "build": "rm -rf dist && kame bundle --resolver ./kame-config.js --loader ./kame-config.js src/main.ts",
     "test": "vitest"
   },
   "repository": "suchipi/shinobi",
@@ -23,6 +20,7 @@
     "@types/minimatch": "^5.1.2",
     "first-base": "^1.3.0",
     "globby": "^11.1.0",
+    "kame": "^0.14.0",
     "minimatch": "^10.0.1",
     "path-less-traveled": "^2.0.0",
     "prettier": "^2.7.1",

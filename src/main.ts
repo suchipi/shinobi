@@ -83,10 +83,10 @@ Notes:
 try {
   const [flags, files] = parseArgv();
   main(flags, ...files).catch((err) => {
-    console.error(err);
+    console.error(err + "\n" + err.stack);
     std.exit(1);
   });
 } catch (err) {
-  console.error(err);
+  console.error(err + "\n" + err.stack);
   std.exit(1);
 }
