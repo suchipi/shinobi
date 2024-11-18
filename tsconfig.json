@@ -1,5 +1,8 @@
 {
-  "include": ["src/**/*.ts"],
+  "include": [
+    "node_modules/@suchipi/quickjs/build/dts/**/*.d.ts",
+    "src/**/*.ts"
+  ],
 
   "compilerOptions": {
     "outDir": "dist",

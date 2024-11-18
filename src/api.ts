@@ -1,22 +1,20 @@
-import path from "path";
-import makeModuleEnv from "make-module-env";
+import * as os from "quickjs:os";
+import * as engine from "quickjs:engine";
 import { makeState, renderState, State } from "./state";
 import { Api, makeApi } from "./script-api";
 import { addPrimordials } from "./primordials";
-
-const MODULE_ENV = Symbol("MODULE_ENV");
 
 export class Shinobi {
   state: State;
   api: Api;
 
-  private [MODULE_ENV]: any;
+  private _workDir: string;
 
-  constructor(cwd: string = process.cwd()) {
+  constructor(cwd: string = os.getcwd()) {
     this.state = makeState();
     this.api = makeApi(this.state);
     addPrimordials(this.state);
-    this[MODULE_ENV] = makeModuleEnv(path.join(cwd, "<shinobi>"));
+    this._workDir = cwd;
   }
 
   load(filename: string) {
@@ -25,13 +23,7 @@ export class Shinobi {
 
     this.state.currentFile = filename;
 
-    const modEnv = this[MODULE_ENV];
-
-    if (path.isAbsolute(filename)) {
-      modEnv.require(filename);
-    } else {
-      modEnv.require("./" + filename);
-    }
+    engine.importModule(filename, `${this._workDir}/<shinobi>`);
 
     this.state.currentFile = null;
   }
