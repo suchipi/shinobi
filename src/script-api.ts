@@ -1,5 +1,5 @@
 import path from "path";
-import globby from "globby";
+import tinyglobby from "tinyglobby";
 import { State } from "./state";
 
 export type Api = ReturnType<typeof makeApi>;
@@ -43,7 +43,7 @@ function objectifyValues(input: { [key: string]: Value }): {
   return Object.fromEntries(
     Object.entries(input)
       .map(([key, value]) => [key, stringifyValue(value)])
-      .filter(([key, value]) => value != null)
+      .filter(([key, value]) => value != null),
   );
 }
 
@@ -53,13 +53,13 @@ export function makeApi(state: State) {
   function declare(name: string, value: Value) {
     if (name === "in" || name === "out") {
       throw new Error(
-        `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`
+        `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`,
       );
     }
 
     if (vars[name]) {
       throw new Error(
-        `Attempt to redefine variable '${name}' in '${state.currentFile}'. Variable was previously defined in '${vars[name].source}'.`
+        `Attempt to redefine variable '${name}' in '${state.currentFile}'. Variable was previously defined in '${vars[name].source}'.`,
       );
     }
 
@@ -75,13 +75,13 @@ export function makeApi(state: State) {
   function overrideDeclaration(name: string, value: Value) {
     if (name === "in" || name === "out") {
       throw new Error(
-        `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`
+        `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`,
       );
     }
 
     if (!Object.prototype.hasOwnProperty.call(vars, name)) {
       throw new Error(
-        `Attempting to override declaration of variable '${name}' in '${state.currentFile}', but variable was never previously defined. Use 'declare' instead.`
+        `Attempting to override declaration of variable '${name}' in '${state.currentFile}', but variable was never previously defined. Use 'declare' instead.`,
       );
     }
 
@@ -97,7 +97,7 @@ export function makeApi(state: State) {
   function declareOrAppend(name: string, value: Value, sep: string = " ") {
     if (name === "in" || name === "out") {
       throw new Error(
-        `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`
+        `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`,
       );
     }
 
@@ -119,13 +119,13 @@ export function makeApi(state: State) {
   function rule(name: string, properties: { [key: string]: Value }) {
     if (rules[name]) {
       throw new Error(
-        `Attempt to redefine rule '${name}' in '${state.currentFile}'. Rule was previously defined in '${rules[name].source}'.`
+        `Attempt to redefine rule '${name}' in '${state.currentFile}'. Rule was previously defined in '${rules[name].source}'.`,
       );
     }
 
     if (!properties.command) {
       throw new Error(
-        `No command specified for rule '${name}'. Command is required.`
+        `No command specified for rule '${name}'. Command is required.`,
       );
     }
 
@@ -196,7 +196,7 @@ export function makeApi(state: State) {
   const env = process.env;
 
   function glob(patterns: string | Array<string>, options?: any) {
-    const results = globby.sync(patterns, options);
+    const results = tinyglobby.globSync(patterns, options);
     return results;
   }
 

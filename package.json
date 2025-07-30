@@ -19,16 +19,16 @@
   "author": "Lily Skye <me@suchipi.com>",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^18.11.9",
-    "first-base": "^1.3.0",
-    "path-less-traveled": "^2.0.0",
-    "prettier": "^2.7.1",
-    "typescript": "^4.8.4",
-    "vitest": "^0.25.2"
+    "@types/node": "^24.1.0",
+    "first-base": "^1.5.2",
+    "path-less-traveled": "^2.1.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
-    "clefairy": "^0.4.0",
-    "globby": "^11.1.0",
-    "make-module-env": "^1.1.2"
+    "clefairy": "^2.1.0",
+    "tinyglobby": "^0.2.14",
+    "make-module-env": "^1.1.3"
   }
 }

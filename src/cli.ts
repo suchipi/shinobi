@@ -27,7 +27,7 @@ Examples:
 Notes:
   Add this comment to the top of your JS scripts to get intellisense in VS Code:
   /// <reference types="@suchipi/shinobi/globals.d.ts" />
-      `.trim()
+      `.trim(),
       );
       return;
     }
@@ -42,9 +42,9 @@ Notes:
 
     const outputPath = flags.out || flags.o;
     if (outputPath) {
-      fs.writeFileSync(outputPath, output);
+      fs.writeFileSync(outputPath.toString(), output);
     } else {
       process.stdout.write(output);
     }
-  }
+  },
 );
