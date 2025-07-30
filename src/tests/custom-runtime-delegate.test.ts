@@ -6,6 +6,7 @@ import { Path, RuntimeDelegate, Shinobi, main } from "..";
 function makeTestRuntimeDelegate() {
   const stdout: Array<string> = [];
   const virtualFs: { [filename: string]: string | Function } = {};
+  const globCalls: Array<any /* args */> = [];
 
   const runtimeDelegate: RuntimeDelegate = {
     getCwd() {
@@ -26,17 +27,23 @@ function makeTestRuntimeDelegate() {
     writeStdout(content) {
       stdout.push(content);
     },
+    globSync(patterns, options) {
+      globCalls.push([patterns, options]);
+      return [];
+    },
   };
 
   return {
     runtimeDelegate,
     stdout,
     virtualFs,
+    globCalls,
   };
 }
 
 test("as arg to Shinobi constructor", () => {
-  const { runtimeDelegate, stdout, virtualFs } = makeTestRuntimeDelegate();
+  const { runtimeDelegate, stdout, virtualFs, globCalls } =
+    makeTestRuntimeDelegate();
 
   const shinobi = new Shinobi(runtimeDelegate);
   const { state, api } = shinobi;
@@ -136,6 +143,8 @@ test("as arg to Shinobi constructor", () => {
     },
   });
 
+  glob("*.*", {});
+
   expect(shinobi.render()).toMatchInlineSnapshot(`
     "# variable 'builddir' from builtin (override with env var BUILDDIR)
     builddir = ./build
@@ -185,8 +194,14 @@ test("as arg to Shinobi constructor", () => {
     "
   `);
 
-  expect({ stdout, virtualFs }).toMatchInlineSnapshot(`
+  expect({ stdout, virtualFs, globCalls }).toMatchInlineSnapshot(`
     {
+      "globCalls": [
+        [
+          "*.*",
+          {},
+        ],
+      ],
       "stdout": [],
       "virtualFs": {},
     }
@@ -194,7 +209,8 @@ test("as arg to Shinobi constructor", () => {
 });
 
 test("provided to main function", () => {
-  const { runtimeDelegate, stdout, virtualFs } = makeTestRuntimeDelegate();
+  const { runtimeDelegate, stdout, virtualFs, globCalls } =
+    makeTestRuntimeDelegate();
 
   virtualFs["/tmp/decls.js"] = () => {
     declare("cc", "gcc");
@@ -272,6 +288,8 @@ test("provided to main function", () => {
         message: "hi",
       },
     });
+
+    glob("*.*", {});
   };
 
   main({
@@ -283,8 +301,15 @@ test("provided to main function", () => {
   expect({
     stdout,
     virtualFs,
+    globCalls,
   }).toMatchInlineSnapshot(`
     {
+      "globCalls": [
+        [
+          "*.*",
+          {},
+        ],
+      ],
       "stdout": [
         "# variable 'builddir' from builtin (override with env var BUILDDIR)
     builddir = ./build
@@ -343,7 +368,8 @@ test("provided to main function", () => {
 });
 
 test("provided to main function (--out)", () => {
-  const { runtimeDelegate, stdout, virtualFs } = makeTestRuntimeDelegate();
+  const { runtimeDelegate, stdout, virtualFs, globCalls } =
+    makeTestRuntimeDelegate();
 
   virtualFs["/tmp/decls.js"] = () => {
     declare("cc", "gcc");
@@ -421,6 +447,8 @@ test("provided to main function (--out)", () => {
         message: "hi",
       },
     });
+
+    glob("*.*", {});
   };
 
   main({
@@ -434,8 +462,15 @@ test("provided to main function (--out)", () => {
   expect({
     stdout,
     virtualFs,
+    globCalls,
   }).toMatchInlineSnapshot(`
     {
+      "globCalls": [
+        [
+          "*.*",
+          {},
+        ],
+      ],
       "stdout": [],
       "virtualFs": {
         "/tmp/build.ninja": "# variable 'builddir' from builtin (override with env var BUILDDIR)
@@ -493,7 +528,8 @@ test("provided to main function (--out)", () => {
 });
 
 test("provided to main function (-o)", () => {
-  const { runtimeDelegate, stdout, virtualFs } = makeTestRuntimeDelegate();
+  const { runtimeDelegate, stdout, virtualFs, globCalls } =
+    makeTestRuntimeDelegate();
 
   virtualFs["/tmp/decls.js"] = () => {
     declare("cc", "gcc");
@@ -571,6 +607,8 @@ test("provided to main function (-o)", () => {
         message: "hi",
       },
     });
+
+    glob("*.*", {});
   };
 
   main({
@@ -584,8 +622,15 @@ test("provided to main function (-o)", () => {
   expect({
     stdout,
     virtualFs,
+    globCalls,
   }).toMatchInlineSnapshot(`
     {
+      "globCalls": [
+        [
+          "*.*",
+          {},
+        ],
+      ],
       "stdout": [],
       "virtualFs": {
         "/tmp/build.ninja": "# variable 'builddir' from builtin (override with env var BUILDDIR)
@@ -643,7 +688,8 @@ test("provided to main function (-o)", () => {
 });
 
 test("provided to main function (--help)", () => {
-  const { runtimeDelegate, stdout, virtualFs } = makeTestRuntimeDelegate();
+  const { runtimeDelegate, stdout, virtualFs, globCalls } =
+    makeTestRuntimeDelegate();
 
   main({
     flags: {
@@ -656,8 +702,10 @@ test("provided to main function (--help)", () => {
   expect({
     stdout,
     virtualFs,
+    globCalls,
   }).toMatchInlineSnapshot(`
     {
+      "globCalls": [],
       "stdout": [
         "shinobi - Generate ninja build files from JS scripts
 
@@ -680,7 +728,8 @@ test("provided to main function (--help)", () => {
 });
 
 test("provided to main function (-h)", () => {
-  const { runtimeDelegate, stdout, virtualFs } = makeTestRuntimeDelegate();
+  const { runtimeDelegate, stdout, virtualFs, globCalls } =
+    makeTestRuntimeDelegate();
 
   main({
     flags: {
@@ -693,8 +742,10 @@ test("provided to main function (-h)", () => {
   expect({
     stdout,
     virtualFs,
+    globCalls,
   }).toMatchInlineSnapshot(`
     {
+      "globCalls": [],
       "stdout": [
         "shinobi - Generate ninja build files from JS scripts
 
