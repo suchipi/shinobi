@@ -3,6 +3,7 @@ export type RuntimeDelegate = {
   runFileSync(filename: string): void;
   writeStdout(content: string): void;
   writeFileSync(filename: string, content: string): void;
+  globSync(patterns: string | Array<string>, options?: any): Array<string>;
 };
 
 export function makeNodeJsRuntimeDelegate(
@@ -14,6 +15,7 @@ export function makeNodeJsRuntimeDelegate(
     require("make-module-env") as typeof import("make-module-env");
   const path = require("path") as typeof import("path");
   const fs = require("fs") as typeof import("fs");
+  const tinyglobby = require("tinyglobby") as typeof import("tinyglobby");
 
   const modEnv = makeModuleEnv(path.join(cwd, "<shinobi>"));
 
@@ -33,6 +35,9 @@ export function makeNodeJsRuntimeDelegate(
     },
     writeFileSync(filename, content) {
       fs.writeFileSync(filename, content);
+    },
+    globSync(patterns, options) {
+      return tinyglobby.globSync(patterns, options);
     },
   };
 }

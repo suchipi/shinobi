@@ -25,7 +25,7 @@ export class Shinobi {
     }
 
     this.state = makeState();
-    this.api = makeApi(this.state);
+    this.api = makeApi(this.state, runtimeDelegate);
     this[RUNTIME_DELEGATE] = runtimeDelegate;
     addPrimordials(this.state);
   }

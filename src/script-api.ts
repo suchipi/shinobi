@@ -1,6 +1,6 @@
 import path from "path";
-import tinyglobby from "tinyglobby";
 import { State } from "./state";
+import { RuntimeDelegate } from "./runtime-delegate";
 
 export type Api = ReturnType<typeof makeApi>;
 
@@ -47,7 +47,7 @@ function objectifyValues(input: { [key: string]: Value }): {
   );
 }
 
-export function makeApi(state: State) {
+export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
   const { vars, builds, rules } = state;
 
   function declare(name: string, value: Value) {
@@ -196,7 +196,7 @@ export function makeApi(state: State) {
   const env = process.env;
 
   function glob(patterns: string | Array<string>, options?: any) {
-    const results = tinyglobby.globSync(patterns, options);
+    const results = runtimeDelegate.globSync(patterns, options);
     return results;
   }
 
