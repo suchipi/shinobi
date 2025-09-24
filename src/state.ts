@@ -37,7 +37,7 @@ export function renderState(state: State): string {
 
     if (rule.implicitInputs.length > 0) {
       outputLines.push(
-        `  # with implicit inputs: ${rule.implicitInputs.join(" ")}`
+        `  # with implicit inputs: ${rule.implicitInputs.join(" ")}`,
       );
     }
   }
@@ -46,13 +46,13 @@ export function renderState(state: State): string {
 
   for (const build of builds) {
     outputLines.push(`# build for '${build.output}' from ${build.source}`);
-    let line = `build ${build.output}: ${build.rule} ${build.inputs.join(" ")}`;
+    let line = `build ${build.output}: ${build.rule} ${build.inputs.map((input) => input.replace(/:/g, "$:")).join(" ")}`;
 
     const ruleForBuild = rules[build.rule];
     const implicitInputs = [
       ...build.implicitInputs,
       ...ruleForBuild.implicitInputs,
-    ];
+    ].map((input) => input.replace(/:/g, "$:"));
 
     if (implicitInputs.length > 0) {
       line += " | " + implicitInputs.join(" ");
