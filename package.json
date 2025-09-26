@@ -28,7 +28,8 @@
   },
   "dependencies": {
     "clefairy": "^2.1.0",
-    "tinyglobby": "^0.2.14",
-    "make-module-env": "^1.1.3"
+    "make-module-env": "^1.1.3",
+    "nice-path": "^3.1.0",
+    "tinyglobby": "^0.2.14"
   }
 }

@@ -2,7 +2,10 @@ import { expect, test } from "vitest";
 import { Shinobi } from "..";
 
 test("return values", () => {
-  const shinobi = new Shinobi();
+  const shinobi = new Shinobi(undefined, {
+    apiPathSeparator: "/",
+    fsPathSeparator: "/",
+  });
   const { state, api } = shinobi;
 
   const {

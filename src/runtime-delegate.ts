@@ -1,4 +1,12 @@
+import { Path } from "nice-path";
+
+export type PathSeparators = {
+  fsPathSeparator: string;
+  apiPathSeparator: string;
+};
+
 export type RuntimeDelegate = {
+  getPathSeparators(): PathSeparators;
   getCwd(): string;
   runFileSync(filename: string): void;
   writeStdout(content: string): void;
@@ -8,26 +16,45 @@ export type RuntimeDelegate = {
 
 export function makeNodeJsRuntimeDelegate(
   cwdOverride?: string,
+  pathSeparatorOverride?: Partial<PathSeparators>,
 ): RuntimeDelegate {
-  const cwd = cwdOverride ?? process.cwd();
-
   const { makeModuleEnv } =
     require("make-module-env") as typeof import("make-module-env");
-  const path = require("path") as typeof import("path");
   const fs = require("fs") as typeof import("fs");
   const tinyglobby = require("tinyglobby") as typeof import("tinyglobby");
 
-  const modEnv = makeModuleEnv(path.join(cwd, "<shinobi>"));
+  function getPathSeparators() {
+    const platformSeparator = process.platform === "win32" ? "\\" : "/";
+    return {
+      fsPathSeparator:
+        pathSeparatorOverride?.fsPathSeparator ?? platformSeparator,
+      apiPathSeparator:
+        pathSeparatorOverride?.apiPathSeparator ?? platformSeparator,
+    };
+  }
+
+  const separators = getPathSeparators();
+  const cwd = cwdOverride ?? process.cwd();
+  const cwdPath = new Path(cwd);
+  cwdPath.separator = separators.fsPathSeparator;
+
+  const modEnv = makeModuleEnv(cwdPath.concat("<shinobi>").toString());
 
   return {
+    getPathSeparators,
     getCwd() {
       return cwd;
     },
     runFileSync(filename: string) {
-      if (path.isAbsolute(filename)) {
+      if (Path.isAbsolute(filename)) {
         modEnv.require(filename);
       } else {
-        modEnv.require("./" + filename);
+        const relativePath = Path.from([
+          ".",
+          separators.fsPathSeparator,
+        ]).concat(filename);
+
+        modEnv.require(relativePath.toString());
       }
     },
     writeStdout(content) {

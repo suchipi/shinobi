@@ -2,7 +2,10 @@ import { expect, test } from "vitest";
 import { Shinobi } from "..";
 
 test("implicit inputs on rule are inherited by builds using that rule", () => {
-  const shinobi = new Shinobi();
+  const shinobi = new Shinobi(undefined, {
+    apiPathSeparator: "/",
+    fsPathSeparator: "/",
+  });
   const { state, api } = shinobi;
 
   const { build, rule } = api;

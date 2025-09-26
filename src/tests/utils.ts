@@ -8,11 +8,13 @@ export const fixturesDir = pathMarker(path.resolve(__dirname, "fixtures"));
 export const cliPath = rootDir("dist/cli.js");
 
 export function cleanString(str: string): string {
-  return str.replaceAll(rootDir(), "<rootDir>");
+  return str
+    .replaceAll(rootDir(), "<rootDir>")
+    .replaceAll(rootDir().replace(/:/g, "$:"), "<rootDir>");
 }
 
 export function cleanResult(
-  result: RunContext["result"]
+  result: RunContext["result"],
 ): RunContext["result"] {
   return {
     ...result,

@@ -19,8 +19,12 @@ test("cli - output to stdout", async () => {
       fixturesDir("env.js"),
       fixturesDir("rules.js"),
       fixturesDir("stuff.js"),
+      "--fs-path-separator",
+      "/",
+      "--api-path-separator",
+      "/",
     ],
-    { cwd: rootDir() }
+    { cwd: rootDir() },
   );
   await run.completion;
 
@@ -106,8 +110,12 @@ describe("writing output to file", () => {
         fixturesDir("stuff.js"),
         "-o",
         cliOutputTxt,
+        "--fs-path-separator",
+        "/",
+        "--api-path-separator",
+        "/",
       ],
-      { cwd: rootDir() }
+      { cwd: rootDir() },
     );
     await run.completion;
 
@@ -182,8 +190,12 @@ describe("writing output to file", () => {
         fixturesDir("stuff.js"),
         "--out",
         cliOutputTxt,
+        "--fs-path-separator",
+        "/",
+        "--api-path-separator",
+        "/",
       ],
-      { cwd: rootDir() }
+      { cwd: rootDir() },
     );
     await run.completion;
 

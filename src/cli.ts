@@ -9,13 +9,18 @@ export async function nodeJsCliMain(
     h?: boolean;
     out?: clefairy.Path;
     o?: clefairy.Path;
+    fsPathSeparator?: string;
+    apiPathSeparator?: string;
   },
   ...files: Array<string>
 ) {
   main({
     flags,
     files,
-    runtimeDelegate: makeNodeJsRuntimeDelegate(),
+    runtimeDelegate: makeNodeJsRuntimeDelegate(undefined, {
+      fsPathSeparator: flags.fsPathSeparator,
+      apiPathSeparator: flags.apiPathSeparator,
+    }),
   });
 }
 
@@ -25,6 +30,8 @@ clefairy.run(
     h: clefairy.optionalBoolean,
     out: clefairy.optionalPath,
     o: clefairy.optionalPath,
+    fsPathSeparator: clefairy.optionalString,
+    apiPathSeparator: clefairy.optionalString,
   },
   nodeJsCliMain,
 );

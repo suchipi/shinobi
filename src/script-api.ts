@@ -1,4 +1,4 @@
-import path from "path";
+import { Path } from "nice-path";
 import { State } from "./state";
 import { RuntimeDelegate } from "./runtime-delegate";
 
@@ -49,6 +49,7 @@ function objectifyValues(input: { [key: string]: Value }): {
 
 export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
   const { vars, builds, rules } = state;
+  const pathSeparators = runtimeDelegate.getPathSeparators();
 
   function declare(name: string, value: Value) {
     if (name === "in" || name === "out") {
@@ -177,17 +178,21 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
   }
 
   function rel(somePath?: string): string {
-    const dir = path.dirname(state.currentFile!);
+    const currentFilePath = new Path(state.currentFile!);
+    currentFilePath.separator = pathSeparators.apiPathSeparator;
+    const dir = currentFilePath.dirname();
     if (somePath) {
-      return path.resolve(dir, "./" + somePath);
+      return dir.concat(somePath).normalize().toString();
     } else {
-      return dir;
+      return dir.toString();
     }
   }
 
   function builddir(somePath?: string): string {
     if (somePath) {
-      return path.join("$builddir", somePath);
+      const builddirPath = new Path("$builddir");
+      builddirPath.separator = pathSeparators.apiPathSeparator;
+      return builddirPath.concat(somePath).toString();
     } else {
       return "$builddir";
     }
@@ -197,7 +202,12 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
 
   function glob(patterns: string | Array<string>, options?: any) {
     const results = runtimeDelegate.globSync(patterns, options);
-    return results;
+    const resultsWithSeparator = results.map((result) => {
+      const path = new Path(result);
+      path.separator = pathSeparators.apiPathSeparator;
+      return path.toString();
+    });
+    return resultsWithSeparator;
   }
 
   function getVar(name: string): string | null {
