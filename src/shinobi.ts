@@ -1,11 +1,7 @@
 import { makeState, renderState, State } from "./state";
 import { Api, makeApi } from "./script-api";
 import { addPrimordials } from "./primordials";
-import {
-  makeNodeJsRuntimeDelegate,
-  type PathSeparators,
-  RuntimeDelegate,
-} from "./runtime-delegate";
+import { makeNodeJsRuntimeDelegate, RuntimeDelegate } from "./runtime-delegate";
 
 const RUNTIME_DELEGATE = Symbol("RUNTIME_DELEGATE");
 
@@ -15,7 +11,7 @@ export class Shinobi {
 
   private [RUNTIME_DELEGATE]: RuntimeDelegate;
 
-  constructor(cwd?: string, pathSeparatorsOverride?: Partial<PathSeparators>);
+  constructor(cwdOverride?: string, pathSeparatorOverride?: string);
   constructor(runtimeDelegate?: RuntimeDelegate);
   constructor(...args: Array<any>) {
     let runtimeDelegate: RuntimeDelegate;

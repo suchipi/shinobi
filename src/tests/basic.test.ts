@@ -2,10 +2,7 @@ import { expect, test } from "vitest";
 import { Shinobi } from "..";
 
 test("basic test", () => {
-  const shinobi = new Shinobi(undefined, {
-    fsPathSeparator: "/",
-    apiPathSeparator: "/",
-  });
+  const shinobi = new Shinobi(undefined, "/");
   const { state, api } = shinobi;
 
   const {
@@ -154,10 +151,7 @@ test("basic test", () => {
 });
 
 test("cwd override", () => {
-  const shinobi = new Shinobi("/tmp/myplace", {
-    fsPathSeparator: "/",
-    apiPathSeparator: "/",
-  });
+  const shinobi = new Shinobi("/tmp/myplace", "/");
   const { state, api } = shinobi;
 
   const {
@@ -306,10 +300,7 @@ test("cwd override", () => {
 });
 
 test("windows-style paths", () => {
-  const shinobi = new Shinobi("C:\\users\\me\\myplace", {
-    fsPathSeparator: "\\",
-    apiPathSeparator: "\\",
-  });
+  const shinobi = new Shinobi("C:\\users\\me\\myplace", "\\");
   const { state, api } = shinobi;
 
   const {

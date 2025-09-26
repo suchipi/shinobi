@@ -1,12 +1,7 @@
 import { Path } from "nice-path";
 
-export type PathSeparators = {
-  fsPathSeparator: string;
-  apiPathSeparator: string;
-};
-
 export type RuntimeDelegate = {
-  getPathSeparators(): PathSeparators;
+  getPathSeparator(): string;
   getCwd(): string;
   runFileSync(filename: string): void;
   writeStdout(content: string): void;
@@ -16,43 +11,46 @@ export type RuntimeDelegate = {
 
 export function makeNodeJsRuntimeDelegate(
   cwdOverride?: string,
-  pathSeparatorOverride?: Partial<PathSeparators>,
+  pathSeparatorOverride?: string,
 ): RuntimeDelegate {
   const { makeModuleEnv } =
     require("make-module-env") as typeof import("make-module-env");
   const fs = require("fs") as typeof import("fs");
   const tinyglobby = require("tinyglobby") as typeof import("tinyglobby");
 
-  function getPathSeparators() {
-    const platformSeparator = process.platform === "win32" ? "\\" : "/";
-    return {
-      fsPathSeparator:
-        pathSeparatorOverride?.fsPathSeparator ?? platformSeparator,
-      apiPathSeparator:
-        pathSeparatorOverride?.apiPathSeparator ?? platformSeparator,
-    };
+  let pathSeparator: string;
+  if (pathSeparatorOverride != null) {
+    pathSeparator = pathSeparatorOverride;
+  } else if (cwdOverride != null) {
+    let detectedSeparator = Path.detectSeparator(cwdOverride, null);
+    if (detectedSeparator != null) {
+      pathSeparator = detectedSeparator;
+    } else {
+      pathSeparator = process.platform === "win32" ? "\\" : "/";
+    }
+  } else {
+    pathSeparator = process.platform === "win32" ? "\\" : "/";
   }
 
-  const separators = getPathSeparators();
   const cwd = cwdOverride ?? process.cwd();
   const cwdPath = new Path(cwd);
-  cwdPath.separator = separators.fsPathSeparator;
+  cwdPath.separator = pathSeparator;
+  const cwdWithSeparator = cwdPath.toString();
 
   const modEnv = makeModuleEnv(cwdPath.concat("<shinobi>").toString());
 
   return {
-    getPathSeparators,
+    getPathSeparator() {
+      return pathSeparator;
+    },
     getCwd() {
-      return cwd;
+      return cwdWithSeparator;
     },
     runFileSync(filename: string) {
       if (Path.isAbsolute(filename)) {
         modEnv.require(filename);
       } else {
-        const relativePath = Path.from([
-          ".",
-          separators.fsPathSeparator,
-        ]).concat(filename);
+        const relativePath = Path.from([".", pathSeparator]).concat(filename);
 
         modEnv.require(relativePath.toString());
       }

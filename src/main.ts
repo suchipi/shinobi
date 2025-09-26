@@ -28,12 +28,9 @@ Usage: shinobi [options] <scripts...>
 Options:
   --help, -h: Show this text
   --out, -o: Output path (defaults to stdout)
-  --fs-path-separator: The path separator to use for Node.js fs module
-                       operations during shinobi execution. Defaults to "\\" on
-                       Windows and "/" on other platforms.
-  --api-path-separator: The path separator to use in path strings returned by
-                        shinobi API functions like 'rel' and 'glob'. Defaults
-                        to "\\" on Windows and "/" on other platforms.
+  --path-separator: The path separator to use in all places where string paths
+                    are synthesized. Defaults to "\\" on Windows and "/" on
+                    other platforms.
 Examples:
   shinobi defs.js rules.js programs.js > build.ninja
   shinobi mybuild.js -o build.ninja

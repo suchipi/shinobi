@@ -49,7 +49,7 @@ function objectifyValues(input: { [key: string]: Value }): {
 
 export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
   const { vars, builds, rules } = state;
-  const pathSeparators = runtimeDelegate.getPathSeparators();
+  const pathSeparator = runtimeDelegate.getPathSeparator();
 
   function declare(name: string, value: Value) {
     if (name === "in" || name === "out") {
@@ -179,7 +179,7 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
 
   function rel(somePath?: string): string {
     const currentFilePath = new Path(state.currentFile!);
-    currentFilePath.separator = pathSeparators.apiPathSeparator;
+    currentFilePath.separator = pathSeparator;
     const dir = currentFilePath.dirname();
     if (somePath) {
       return dir.concat(somePath).normalize().toString();
@@ -191,7 +191,7 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
   function builddir(somePath?: string): string {
     if (somePath) {
       const builddirPath = new Path("$builddir");
-      builddirPath.separator = pathSeparators.apiPathSeparator;
+      builddirPath.separator = pathSeparator;
       return builddirPath.concat(somePath).toString();
     } else {
       return "$builddir";
@@ -204,7 +204,7 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
     const results = runtimeDelegate.globSync(patterns, options);
     const resultsWithSeparator = results.map((result) => {
       const path = new Path(result);
-      path.separator = pathSeparators.apiPathSeparator;
+      path.separator = pathSeparator;
       return path.toString();
     });
     return resultsWithSeparator;
