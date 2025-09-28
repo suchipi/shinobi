@@ -5,6 +5,5 @@ export { Variable, Rule, Build } from "./types";
 
 // Internals exported for custom runtime delegate implementation
 export { main } from "./main";
-export { nodeJsCliMain } from "./cli";
 export { Path } from "clefairy";
 export { RuntimeDelegate, makeNodeJsRuntimeDelegate } from "./runtime-delegate";
