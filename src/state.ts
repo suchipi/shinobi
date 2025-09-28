@@ -49,6 +49,11 @@ export function renderState(state: State): string {
     let line = `build ${build.output}: ${build.rule} ${build.inputs.map((input) => input.replace(/:/g, "$:")).join(" ")}`;
 
     const ruleForBuild = rules[build.rule];
+    if (ruleForBuild == null) {
+      throw new Error(
+        `Build for ${JSON.stringify(build.output)} asked for rule ${JSON.stringify(build.rule)}, but no such rule had been defined! The rules we had were: ${JSON.stringify(Object.keys(rules))}.`,
+      );
+    }
     const implicitInputs = [
       ...build.implicitInputs,
       ...ruleForBuild.implicitInputs,
