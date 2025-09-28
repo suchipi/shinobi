@@ -2,6 +2,7 @@ import { makeState, renderState, State } from "./state";
 import { Api, makeApi } from "./script-api";
 import { addPrimordials } from "./primordials";
 import { makeNodeJsRuntimeDelegate, RuntimeDelegate } from "./runtime-delegate";
+import { Path } from "nice-path";
 
 const RUNTIME_DELEGATE = Symbol("RUNTIME_DELEGATE");
 
@@ -41,7 +42,10 @@ export class Shinobi {
     // Make the script API available to scripts as globals
     Object.assign(globalThis, this.api);
 
-    this.state.currentFile = filename;
+    const filenamePath = new Path(filename);
+    filenamePath.separator = this[RUNTIME_DELEGATE].getPathSeparator();
+
+    this.state.currentFile = filenamePath.toString();
 
     this[RUNTIME_DELEGATE].runFileSync(filename);
 

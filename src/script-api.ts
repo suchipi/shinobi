@@ -1,4 +1,5 @@
 import { Path } from "nice-path";
+import * as t from "pheno";
 import { State } from "./state";
 import { RuntimeDelegate } from "./runtime-delegate";
 
@@ -12,7 +13,18 @@ export type Value =
   | null
   | Array<string | boolean | number | undefined | null>;
 
-function stringifyValue(input: Value): null | string {
+const t_Value = t.union(
+  t.string,
+  t.boolean,
+  t.number,
+  t.undefined,
+  t.null,
+  t.arrayOf(t.union(t.string, t.boolean, t.number, t.undefined, t.null)),
+);
+
+const t_ValueObject = t.record(t.string, t_Value);
+
+function valueToStringOrNull(input: Value): null | string {
   if (input == null) {
     return null;
   } else if (Array.isArray(input)) {
@@ -22,13 +34,13 @@ function stringifyValue(input: Value): null | string {
   }
 }
 
-function arrayifyValue(input: Value): Array<string> {
+function valueToStringsArray(input: Value): Array<string> {
   if (Array.isArray(input)) {
     return input
-      .map((value) => stringifyValue(value))
+      .map((value) => valueToStringOrNull(value))
       .filter((value) => value != null) as Array<string>;
   } else {
-    const stringified = stringifyValue(input);
+    const stringified = valueToStringOrNull(input);
     if (stringified == null) {
       return [];
     } else {
@@ -37,12 +49,12 @@ function arrayifyValue(input: Value): Array<string> {
   }
 }
 
-function objectifyValues(input: { [key: string]: Value }): {
+function valuesObjectToStringsObject(input: { [key: string]: Value }): {
   [key: string]: string;
 } {
   return Object.fromEntries(
     Object.entries(input)
-      .map(([key, value]) => [key, stringifyValue(value)])
+      .map(([key, value]) => [key, valueToStringOrNull(value)])
       .filter(([key, value]) => value != null),
   );
 }
@@ -52,6 +64,9 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
   const pathSeparator = runtimeDelegate.getPathSeparator();
 
   function declare(name: string, value: Value) {
+    t.assertType(name, t.string);
+    t.assertType(value, t_Value);
+
     if (name === "in" || name === "out") {
       throw new Error(
         `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`,
@@ -66,7 +81,7 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
 
     vars[name] = {
       name,
-      value: stringifyValue(value) ?? "",
+      value: valueToStringOrNull(value) ?? "",
       source: state.currentFile!,
     };
 
@@ -74,6 +89,9 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
   }
 
   function overrideDeclaration(name: string, value: Value) {
+    t.assertType(name, t.string);
+    t.assertType(value, t_Value);
+
     if (name === "in" || name === "out") {
       throw new Error(
         `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`,
@@ -88,7 +106,7 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
 
     vars[name] = {
       name,
-      value: stringifyValue(value) ?? "",
+      value: valueToStringOrNull(value) ?? "",
       source: state.currentFile!,
     };
 
@@ -96,13 +114,17 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
   }
 
   function declareOrAppend(name: string, value: Value, sep: string = " ") {
+    t.assertType(name, t.string);
+    t.assertType(value, t_Value);
+    t.assertType(sep, t.string);
+
     if (name === "in" || name === "out") {
       throw new Error(
         `'${name}' is a reserved variable name in ninja (used for rule ${name}puts)`,
       );
     }
 
-    const stringified = stringifyValue(value);
+    const stringified = valueToStringOrNull(value);
     const existing = vars[name];
     if (existing) {
       if (stringified) {
@@ -118,6 +140,9 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
   }
 
   function rule(name: string, properties: { [key: string]: Value }) {
+    t.assertType(name, t.string);
+    t.assertType(properties, t_ValueObject);
+
     if (rules[name]) {
       throw new Error(
         `Attempt to redefine rule '${name}' in '${state.currentFile}'. Rule was previously defined in '${rules[name].source}'.`,
@@ -134,8 +159,8 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
 
     rules[name] = {
       name,
-      properties: objectifyValues(others),
-      implicitInputs: arrayifyValue(implicitInputs),
+      properties: valuesObjectToStringsObject(others),
+      implicitInputs: valueToStringsArray(implicitInputs),
       source: state.currentFile!,
     };
 
@@ -157,20 +182,18 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
       ruleVariables = {},
     } = config;
 
-    if (typeof output !== "string") {
-      throw new Error("output should be a string");
-    }
-
-    if (rule == null) {
-      throw new Error("rule was null or undefined");
-    }
+    t.assertType(output, t.string);
+    t.assertType(rule, t.string);
+    t.assertType(inputs, t_Value);
+    t.assertType(implicitInputs, t_Value);
+    t.assertType(ruleVariables, t_ValueObject);
 
     builds.push({
       output,
       rule,
-      inputs: arrayifyValue(inputs),
-      implicitInputs: arrayifyValue(implicitInputs),
-      ruleVariables: objectifyValues(ruleVariables),
+      inputs: valueToStringsArray(inputs),
+      implicitInputs: valueToStringsArray(implicitInputs),
+      ruleVariables: valuesObjectToStringsObject(ruleVariables),
       source: state.currentFile!,
     });
 
@@ -178,6 +201,8 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
   }
 
   function rel(somePath?: string): string {
+    t.assertType(somePath, t.maybe(t.string));
+
     const currentFilePath = new Path(state.currentFile!);
     currentFilePath.separator = pathSeparator;
     const dir = currentFilePath.dirname();
@@ -189,6 +214,8 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
   }
 
   function builddir(somePath?: string): string {
+    t.assertType(somePath, t.maybe(t.string));
+
     if (somePath) {
       const builddirPath = new Path("$builddir");
       builddirPath.separator = pathSeparator;
@@ -201,6 +228,8 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
   const env = process.env;
 
   function glob(patterns: string | Array<string>, options?: any) {
+    t.assertType(patterns, t.union(t.string, t.arrayOf(t.string)));
+
     const results = runtimeDelegate.globSync(patterns, options);
     const resultsWithSeparator = results.map((result) => {
       const path = new Path(result);
@@ -211,6 +240,8 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
   }
 
   function getVar(name: string): string | null {
+    t.assertType(name, t.string);
+
     const maybeVar = vars[name];
     if (maybeVar) {
       return maybeVar.value;
