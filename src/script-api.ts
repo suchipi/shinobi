@@ -75,7 +75,7 @@ export function makeApi(state: State, runtimeDelegate: RuntimeDelegate) {
 
     if (vars[name]) {
       throw new Error(
-        `Attempt to redefine variable '${name}' in '${state.currentFile}'. Variable was previously defined in '${vars[name].source}'.`,
+        `Attempt to redeclare variable '${name}' in '${state.currentFile}'. Variable was previously declared in '${vars[name].source}'. Maybe instead you want to use 'declareOrAppend', or 'overrideDeclaration'?`,
       );
     }
 
