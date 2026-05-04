@@ -42,7 +42,12 @@ export class Shinobi {
     // Make the script API available to scripts as globals
     Object.assign(globalThis, this.api);
 
-    const filenamePath = new Path(filename);
+    let filenamePath = new Path(filename);
+
+    if (!filenamePath.isAbsolute()) {
+      filenamePath = new Path(process.cwd()).concat(filenamePath).normalize();
+    }
+
     filenamePath.separator = this[RUNTIME_DELEGATE].getPathSeparator();
 
     this.state.currentFile = filenamePath.toString();
