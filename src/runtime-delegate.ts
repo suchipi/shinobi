@@ -26,10 +26,24 @@ export function makeNodeJsRuntimeDelegate(
     if (detectedSeparator != null) {
       pathSeparator = detectedSeparator;
     } else {
-      pathSeparator = process.platform === "win32" ? "\\" : "/";
+      if (
+        process.platform === "win32" &&
+        typeof process.env.MSYSTEM === "undefined"
+      ) {
+        pathSeparator = "\\";
+      } else {
+        pathSeparator = "/";
+      }
     }
   } else {
-    pathSeparator = process.platform === "win32" ? "\\" : "/";
+    if (
+      process.platform === "win32" &&
+      typeof process.env.MSYSTEM === "undefined"
+    ) {
+      pathSeparator = "\\";
+    } else {
+      pathSeparator = "/";
+    }
   }
 
   const cwd = cwdOverride ?? process.cwd();

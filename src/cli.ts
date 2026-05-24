@@ -2,17 +2,9 @@
 import * as clefairy from "clefairy";
 import { main } from "./main";
 import { makeNodeJsRuntimeDelegate } from "./runtime-delegate";
+import { Flags } from "./flags";
 
-export async function nodeJsCliMain(
-  flags: {
-    help?: boolean;
-    h?: boolean;
-    out?: clefairy.Path;
-    o?: clefairy.Path;
-    pathSeparator?: string;
-  },
-  ...files: Array<string>
-) {
+export async function nodeJsCliMain(flags: Flags, ...files: Array<string>) {
   main({
     flags,
     files,

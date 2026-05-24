@@ -1,45 +1,18 @@
-#!/usr/bin/env node
-import type * as clefairy from "clefairy";
 import { Shinobi } from "./shinobi";
 import type { RuntimeDelegate } from "./runtime-delegate";
+import { Flags, USAGE } from "./flags";
 
 export async function main({
   flags,
   files,
   runtimeDelegate,
 }: {
-  flags: {
-    help?: boolean;
-    h?: boolean;
-    out?: clefairy.Path;
-    o?: clefairy.Path;
-    fsPathSeparator?: string;
-    apiPathSeparator?: string;
-  };
+  flags: Flags;
   files: Array<string>;
   runtimeDelegate: RuntimeDelegate;
 }) {
   if (flags.help || flags.h) {
-    runtimeDelegate.writeStdout(
-      `
-shinobi - Generate ninja build files from JS scripts
-
-Usage: shinobi [options] <scripts...>
-Options:
-  --help, -h: Show this text
-  --out, -o: Output path (defaults to stdout)
-  --path-separator: The path separator to use in all places where string paths
-                    are synthesized. Defaults to "\\" on Windows and "/" on
-                    other platforms.
-Examples:
-  shinobi defs.js rules.js programs.js > build.ninja
-  shinobi mybuild.js -o build.ninja
-  shinobi ninja/**/*.js -o build.ninja
-Notes:
-  Add this comment to the top of your JS scripts to get intellisense in VS Code:
-  /// <reference types="@suchipi/shinobi/globals.d.ts" />
-      `.trim() + "\n",
-    );
+    runtimeDelegate.writeStdout(USAGE);
     return;
   }
 
@@ -53,6 +26,9 @@ Notes:
 
   const outputPath = flags.out || flags.o;
   if (outputPath) {
+    if (flags.pathSeparator) {
+      outputPath.separator = flags.pathSeparator;
+    }
     runtimeDelegate.writeFileSync(outputPath.toString(), output);
   } else {
     runtimeDelegate.writeStdout(output);
