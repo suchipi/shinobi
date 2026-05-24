@@ -46,7 +46,7 @@ export function renderState(state: State): string {
 
   for (const build of builds) {
     outputLines.push(`# build for '${build.output}' from ${build.source}`);
-    let line = `build ${build.output}: ${build.rule} ${build.inputs.map((input) => input.replace(/:/g, "$:")).join(" ")}`;
+    let line = `build ${build.output.replace(/:/g, "$:")}: ${build.rule} ${build.inputs.map((input) => input.replace(/:/g, "$:")).join(" ")}`;
 
     const ruleForBuild = rules[build.rule];
     if (ruleForBuild == null) {
