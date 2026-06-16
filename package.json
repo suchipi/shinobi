@@ -20,18 +20,18 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.1.0",
-    "first-base": "^1.5.2",
-    "path-less-traveled": "^2.1.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
+    "first-base": "^4.0.1",
+    "path-less-traveled": "^2.2.1",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
   },
   "dependencies": {
     "clefairy": "^2.1.0",
     "make-module-env": "^1.2.0",
-    "nice-path": "^3.1.0",
-    "pheno": "^0.12.0",
-    "tinyglobby": "^0.2.15"
+    "nice-path": "^3.2.2",
+    "pheno": "^1.13.1",
+    "tinyglobby": "^0.2.17"
   },
   "publishConfig": {
     "access": "public"

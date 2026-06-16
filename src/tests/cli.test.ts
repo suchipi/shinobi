@@ -29,7 +29,7 @@ test("cli - output to stdout", async () => {
   expect(cleanResult(run.result)).toMatchInlineSnapshot(`
     {
       "code": 0,
-      "error": false,
+      "error": null,
       "stderr": "",
       "stdout": "# variable 'builddir' from builtin (override with env var BUILDDIR)
     builddir = ./build
@@ -100,7 +100,7 @@ test("cli - output to stdout (non-absolute paths)", async () => {
   expect(cleanResult(run.result)).toMatchInlineSnapshot(`
     {
       "code": 0,
-      "error": false,
+      "error": null,
       "stderr": "",
       "stdout": "# variable 'builddir' from builtin (override with env var BUILDDIR)
     builddir = ./build
@@ -169,7 +169,7 @@ test("rel returns absolute path even when input path is relative", async () => {
   expect(cleanResult(run.result)).toMatchInlineSnapshot(`
     {
       "code": 0,
-      "error": false,
+      "error": null,
       "stderr": "<rootDir>/src/tests/fixtures/env.js
     ",
       "stdout": "# variable 'builddir' from builtin (override with env var BUILDDIR)
@@ -218,7 +218,7 @@ describe("writing output to file", () => {
     expect(cleanResult(run.result)).toMatchInlineSnapshot(`
       {
         "code": 0,
-        "error": false,
+        "error": null,
         "stderr": "",
         "stdout": "",
       }
@@ -296,7 +296,7 @@ describe("writing output to file", () => {
     expect(cleanResult(run.result)).toMatchInlineSnapshot(`
       {
         "code": 0,
-        "error": false,
+        "error": null,
         "stderr": "",
         "stdout": "",
       }

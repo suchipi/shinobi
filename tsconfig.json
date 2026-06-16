@@ -5,9 +5,10 @@
     "lib": ["es2021"],
     "target": "es2021",
 
-    "moduleResolution": "node10",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "module": "commonjs",
+    "rootDir": "src",
     "outDir": "dist",
     "skipLibCheck": true,
     "declaration": true,
@@ -23,7 +24,6 @@
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "downlevelIteration": true,
     "useUnknownInCatchVariables": false,
     "noUncheckedIndexedAccess": true
   }

@@ -19,9 +19,16 @@ export function cleanString(str: string): string {
 export function cleanResult(
   result: RunContext["result"],
 ): RunContext["result"] {
-  return {
-    ...result,
-    stdout: cleanString(result.stdout),
-    stderr: cleanString(result.stderr),
-  };
+  if ("stdout" in result) {
+    return {
+      ...result,
+      stdout: cleanString(result.stdout),
+      stderr: cleanString(result.stderr),
+    };
+  } else {
+    return {
+      ...result,
+      output: cleanString(result.output),
+    };
+  }
 }
