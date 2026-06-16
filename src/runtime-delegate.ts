@@ -13,8 +13,7 @@ export function makeNodeJsRuntimeDelegate(
   cwdOverride?: string,
   pathSeparatorOverride?: string,
 ): RuntimeDelegate {
-  const { makeModuleEnv } =
-    require("make-module-env") as typeof import("make-module-env");
+  const kame = require("kame") as typeof import("kame");
   const fs = require("fs") as typeof import("fs");
   const tinyglobby = require("tinyglobby") as typeof import("tinyglobby");
 
@@ -51,7 +50,24 @@ export function makeNodeJsRuntimeDelegate(
   cwdPath.separator = pathSeparator;
   const cwdWithSeparator = cwdPath.toString();
 
-  const modEnv = makeModuleEnv(cwdPath.concat("<shinobi>").toString());
+  const configuredKame = kame.configure({
+    resolver(id, fromFilePath) {
+      if (fromFilePath.endsWith("/__kame-runtime-load.js")) {
+        if (Path.isAbsolute(id) && fs.existsSync(id)) {
+          return id;
+        } else {
+          const absolutePath = cwdPath.concat(id).normalize().toString();
+          if (fs.existsSync(absolutePath)) {
+            return absolutePath;
+          }
+        }
+      }
+
+      return kame.defaultResolver.resolve(id, fromFilePath);
+    },
+  });
+
+  const runtime = new configuredKame.Runtime();
 
   return {
     getPathSeparator() {
@@ -61,13 +77,7 @@ export function makeNodeJsRuntimeDelegate(
       return cwdWithSeparator;
     },
     runFileSync(filename: string) {
-      if (Path.isAbsolute(filename)) {
-        modEnv.require(filename);
-      } else {
-        const relativePath = Path.from([".", pathSeparator]).concat(filename);
-
-        modEnv.require(relativePath.toString());
-      }
+      runtime.load(filename);
     },
     writeStdout(content) {
       process.stdout.write(content);

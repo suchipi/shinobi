@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "clefairy": "^2.1.0",
-    "make-module-env": "^1.2.0",
+    "kame": "^2.0.0",
     "nice-path": "^3.2.2",
     "pheno": "^1.13.1",
     "tinyglobby": "^0.2.17"

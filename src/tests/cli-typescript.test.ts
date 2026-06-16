@@ -1,0 +1,355 @@
+import { expect, test, describe, beforeEach, afterEach } from "vitest";
+import fs from "node:fs";
+import { spawn } from "first-base";
+import {
+  rootDir,
+  cliPath,
+  cleanResult,
+  cleanString,
+  fixturesDir,
+} from "./utils";
+import path from "node:path";
+
+test("cli - output to stdout", async () => {
+  const run = spawn(
+    // current node binary
+    process.argv0,
+    [
+      cliPath,
+      "--path-separator",
+      "/",
+      fixturesDir("env.js"),
+      fixturesDir("rules.js"),
+      fixturesDir("stuff.ts"),
+    ],
+    { cwd: rootDir() },
+  );
+  await run.completion;
+
+  expect(cleanResult(run.result)).toMatchInlineSnapshot(`
+    {
+      "code": 0,
+      "error": null,
+      "stderr": "",
+      "stdout": "# variable 'builddir' from builtin (override with env var BUILDDIR)
+    builddir = ./build
+    # variable 'cc' from <rootDir>/src/tests/fixtures/env.js
+    cc = gcc
+    # variable 'ar' from <rootDir>/src/tests/fixtures/env.js
+    ar = gcc-ar
+    # variable 'cflags' from <rootDir>/src/tests/fixtures/env.js
+    cflags = -Wall -g
+    # variable 'ldflags' from <rootDir>/src/tests/fixtures/env.js
+    ldflags = 
+    # variable 'libs' from <rootDir>/src/tests/fixtures/env.js
+    libs = -lm -lpthread
+    # variable 'dotexe' from <rootDir>/src/tests/fixtures/env.js
+    dotexe = 
+
+    # rule 'cc' from <rootDir>/src/tests/fixtures/rules.js
+    rule cc
+      command = $cc $cflags $in -o $out
+      description = CC $out
+    # rule 'ar' from <rootDir>/src/tests/fixtures/rules.js
+    rule ar
+      command = rm -f $out && $ar crs $out $in
+      description = AR $out
+    # rule 'link' from <rootDir>/src/tests/fixtures/rules.js
+    rule link
+      command = $cc $ldflags -o $out $in $libs
+      description = CC $out
+    # rule 'something_with_args' from <rootDir>/src/tests/fixtures/rules.js
+    rule something_with_args
+      command = cat $in > $out && echo $message >> $out
+      description = SOMETHING_WITH_ARGS $out
+
+    # build for '$builddir/something.o' from <rootDir>/src/tests/fixtures/stuff.ts
+    build $builddir/something.o: cc <rootDir>/src/tests/fixtures/something.c
+    # build for '$builddir/something_else.o' from <rootDir>/src/tests/fixtures/stuff.ts
+    build $builddir/something_else.o: cc <rootDir>/src/tests/fixtures/something_else.c
+    # build for '$builddir/myprog.o' from <rootDir>/src/tests/fixtures/stuff.ts
+    build $builddir/myprog.o: cc <rootDir>/src/tests/fixtures/myprog.c
+    # build for '$builddir/myprog' from <rootDir>/src/tests/fixtures/stuff.ts
+    build $builddir/myprog: link $builddir/something.o $builddir/myprog.o
+    # build for '$builddir/somethings.a' from <rootDir>/src/tests/fixtures/stuff.ts
+    build $builddir/somethings.a: ar $builddir/something.o $builddir/something_else.o
+    # build for '$builddir/hi.txt' from <rootDir>/src/tests/fixtures/stuff.ts
+    build $builddir/hi.txt: something_with_args <rootDir>/src/tests/fixtures/something.txt
+      message = hi
+    ",
+    }
+  `);
+});
+
+test("cli - output to stdout (non-absolute paths)", async () => {
+  const run = spawn(
+    // current node binary
+    process.argv0,
+    [
+      cliPath,
+      "--path-separator",
+      "/",
+      path.relative(process.cwd(), fixturesDir("env.js")),
+      path.relative(process.cwd(), fixturesDir("rules.js")),
+      path.relative(process.cwd(), fixturesDir("stuff.ts")),
+    ],
+    { cwd: rootDir() },
+  );
+  await run.completion;
+
+  expect(cleanResult(run.result)).toMatchInlineSnapshot(`
+    {
+      "code": 0,
+      "error": null,
+      "stderr": "",
+      "stdout": "# variable 'builddir' from builtin (override with env var BUILDDIR)
+    builddir = ./build
+    # variable 'cc' from <rootDir>/src/tests/fixtures/env.js
+    cc = gcc
+    # variable 'ar' from <rootDir>/src/tests/fixtures/env.js
+    ar = gcc-ar
+    # variable 'cflags' from <rootDir>/src/tests/fixtures/env.js
+    cflags = -Wall -g
+    # variable 'ldflags' from <rootDir>/src/tests/fixtures/env.js
+    ldflags = 
+    # variable 'libs' from <rootDir>/src/tests/fixtures/env.js
+    libs = -lm -lpthread
+    # variable 'dotexe' from <rootDir>/src/tests/fixtures/env.js
+    dotexe = 
+
+    # rule 'cc' from <rootDir>/src/tests/fixtures/rules.js
+    rule cc
+      command = $cc $cflags $in -o $out
+      description = CC $out
+    # rule 'ar' from <rootDir>/src/tests/fixtures/rules.js
+    rule ar
+      command = rm -f $out && $ar crs $out $in
+      description = AR $out
+    # rule 'link' from <rootDir>/src/tests/fixtures/rules.js
+    rule link
+      command = $cc $ldflags -o $out $in $libs
+      description = CC $out
+    # rule 'something_with_args' from <rootDir>/src/tests/fixtures/rules.js
+    rule something_with_args
+      command = cat $in > $out && echo $message >> $out
+      description = SOMETHING_WITH_ARGS $out
+
+    # build for '$builddir/something.o' from <rootDir>/src/tests/fixtures/stuff.ts
+    build $builddir/something.o: cc <rootDir>/src/tests/fixtures/something.c
+    # build for '$builddir/something_else.o' from <rootDir>/src/tests/fixtures/stuff.ts
+    build $builddir/something_else.o: cc <rootDir>/src/tests/fixtures/something_else.c
+    # build for '$builddir/myprog.o' from <rootDir>/src/tests/fixtures/stuff.ts
+    build $builddir/myprog.o: cc <rootDir>/src/tests/fixtures/myprog.c
+    # build for '$builddir/myprog' from <rootDir>/src/tests/fixtures/stuff.ts
+    build $builddir/myprog: link $builddir/something.o $builddir/myprog.o
+    # build for '$builddir/somethings.a' from <rootDir>/src/tests/fixtures/stuff.ts
+    build $builddir/somethings.a: ar $builddir/something.o $builddir/something_else.o
+    # build for '$builddir/hi.txt' from <rootDir>/src/tests/fixtures/stuff.ts
+    build $builddir/hi.txt: something_with_args <rootDir>/src/tests/fixtures/something.txt
+      message = hi
+    ",
+    }
+  `);
+});
+
+test("rel returns absolute path even when input path is relative", async () => {
+  const run = spawn(
+    // current node binary
+    process.argv0,
+    [
+      cliPath,
+      "--path-separator",
+      "/",
+      path.relative(process.cwd(), fixturesDir("rel-test.js")),
+    ],
+    { cwd: rootDir() },
+  );
+  await run.completion;
+
+  expect(cleanResult(run.result)).toMatchInlineSnapshot(`
+    {
+      "code": 0,
+      "error": null,
+      "stderr": "<rootDir>/src/tests/fixtures/env.js
+    ",
+      "stdout": "# variable 'builddir' from builtin (override with env var BUILDDIR)
+    builddir = ./build
+
+
+    ",
+    }
+  `);
+});
+
+describe("writing output to file", () => {
+  const cliOutputTxt = rootDir("dist/tests/cli-typescript-output.txt");
+
+  beforeEach(() => {
+    if (fs.existsSync(cliOutputTxt)) {
+      fs.unlinkSync(cliOutputTxt);
+    }
+    fs.mkdirSync(path.dirname(cliOutputTxt), { recursive: true });
+  });
+
+  afterEach(() => {
+    if (fs.existsSync(cliOutputTxt)) {
+      fs.unlinkSync(cliOutputTxt);
+    }
+  });
+
+  test("via -o", async () => {
+    const run = spawn(
+      // current node binary
+      process.argv0,
+      [
+        cliPath,
+        "--path-separator",
+        "/",
+        fixturesDir("env.js"),
+        fixturesDir("rules.js"),
+        fixturesDir("stuff.ts"),
+        "-o",
+        cliOutputTxt,
+      ],
+      { cwd: rootDir() },
+    );
+    await run.completion;
+
+    expect(cleanResult(run.result)).toMatchInlineSnapshot(`
+      {
+        "code": 0,
+        "error": null,
+        "stderr": "",
+        "stdout": "",
+      }
+    `);
+
+    const cliOutput = fs.readFileSync(cliOutputTxt, "utf-8");
+    expect(cleanString(cliOutput)).toMatchInlineSnapshot(`
+      "# variable 'builddir' from builtin (override with env var BUILDDIR)
+      builddir = ./build
+      # variable 'cc' from <rootDir>/src/tests/fixtures/env.js
+      cc = gcc
+      # variable 'ar' from <rootDir>/src/tests/fixtures/env.js
+      ar = gcc-ar
+      # variable 'cflags' from <rootDir>/src/tests/fixtures/env.js
+      cflags = -Wall -g
+      # variable 'ldflags' from <rootDir>/src/tests/fixtures/env.js
+      ldflags = 
+      # variable 'libs' from <rootDir>/src/tests/fixtures/env.js
+      libs = -lm -lpthread
+      # variable 'dotexe' from <rootDir>/src/tests/fixtures/env.js
+      dotexe = 
+
+      # rule 'cc' from <rootDir>/src/tests/fixtures/rules.js
+      rule cc
+        command = $cc $cflags $in -o $out
+        description = CC $out
+      # rule 'ar' from <rootDir>/src/tests/fixtures/rules.js
+      rule ar
+        command = rm -f $out && $ar crs $out $in
+        description = AR $out
+      # rule 'link' from <rootDir>/src/tests/fixtures/rules.js
+      rule link
+        command = $cc $ldflags -o $out $in $libs
+        description = CC $out
+      # rule 'something_with_args' from <rootDir>/src/tests/fixtures/rules.js
+      rule something_with_args
+        command = cat $in > $out && echo $message >> $out
+        description = SOMETHING_WITH_ARGS $out
+
+      # build for '$builddir/something.o' from <rootDir>/src/tests/fixtures/stuff.ts
+      build $builddir/something.o: cc <rootDir>/src/tests/fixtures/something.c
+      # build for '$builddir/something_else.o' from <rootDir>/src/tests/fixtures/stuff.ts
+      build $builddir/something_else.o: cc <rootDir>/src/tests/fixtures/something_else.c
+      # build for '$builddir/myprog.o' from <rootDir>/src/tests/fixtures/stuff.ts
+      build $builddir/myprog.o: cc <rootDir>/src/tests/fixtures/myprog.c
+      # build for '$builddir/myprog' from <rootDir>/src/tests/fixtures/stuff.ts
+      build $builddir/myprog: link $builddir/something.o $builddir/myprog.o
+      # build for '$builddir/somethings.a' from <rootDir>/src/tests/fixtures/stuff.ts
+      build $builddir/somethings.a: ar $builddir/something.o $builddir/something_else.o
+      # build for '$builddir/hi.txt' from <rootDir>/src/tests/fixtures/stuff.ts
+      build $builddir/hi.txt: something_with_args <rootDir>/src/tests/fixtures/something.txt
+        message = hi
+      "
+    `);
+  });
+
+  test("via --out", async () => {
+    const run = spawn(
+      // current node binary
+      process.argv0,
+      [
+        cliPath,
+        "--path-separator",
+        "/",
+        fixturesDir("env.js"),
+        fixturesDir("rules.js"),
+        fixturesDir("stuff.ts"),
+        "--out",
+        cliOutputTxt,
+      ],
+      { cwd: rootDir() },
+    );
+    await run.completion;
+
+    expect(cleanResult(run.result)).toMatchInlineSnapshot(`
+      {
+        "code": 0,
+        "error": null,
+        "stderr": "",
+        "stdout": "",
+      }
+    `);
+
+    const cliOutput = fs.readFileSync(cliOutputTxt, "utf-8");
+    expect(cleanString(cliOutput)).toMatchInlineSnapshot(`
+      "# variable 'builddir' from builtin (override with env var BUILDDIR)
+      builddir = ./build
+      # variable 'cc' from <rootDir>/src/tests/fixtures/env.js
+      cc = gcc
+      # variable 'ar' from <rootDir>/src/tests/fixtures/env.js
+      ar = gcc-ar
+      # variable 'cflags' from <rootDir>/src/tests/fixtures/env.js
+      cflags = -Wall -g
+      # variable 'ldflags' from <rootDir>/src/tests/fixtures/env.js
+      ldflags = 
+      # variable 'libs' from <rootDir>/src/tests/fixtures/env.js
+      libs = -lm -lpthread
+      # variable 'dotexe' from <rootDir>/src/tests/fixtures/env.js
+      dotexe = 
+
+      # rule 'cc' from <rootDir>/src/tests/fixtures/rules.js
+      rule cc
+        command = $cc $cflags $in -o $out
+        description = CC $out
+      # rule 'ar' from <rootDir>/src/tests/fixtures/rules.js
+      rule ar
+        command = rm -f $out && $ar crs $out $in
+        description = AR $out
+      # rule 'link' from <rootDir>/src/tests/fixtures/rules.js
+      rule link
+        command = $cc $ldflags -o $out $in $libs
+        description = CC $out
+      # rule 'something_with_args' from <rootDir>/src/tests/fixtures/rules.js
+      rule something_with_args
+        command = cat $in > $out && echo $message >> $out
+        description = SOMETHING_WITH_ARGS $out
+
+      # build for '$builddir/something.o' from <rootDir>/src/tests/fixtures/stuff.ts
+      build $builddir/something.o: cc <rootDir>/src/tests/fixtures/something.c
+      # build for '$builddir/something_else.o' from <rootDir>/src/tests/fixtures/stuff.ts
+      build $builddir/something_else.o: cc <rootDir>/src/tests/fixtures/something_else.c
+      # build for '$builddir/myprog.o' from <rootDir>/src/tests/fixtures/stuff.ts
+      build $builddir/myprog.o: cc <rootDir>/src/tests/fixtures/myprog.c
+      # build for '$builddir/myprog' from <rootDir>/src/tests/fixtures/stuff.ts
+      build $builddir/myprog: link $builddir/something.o $builddir/myprog.o
+      # build for '$builddir/somethings.a' from <rootDir>/src/tests/fixtures/stuff.ts
+      build $builddir/somethings.a: ar $builddir/something.o $builddir/something_else.o
+      # build for '$builddir/hi.txt' from <rootDir>/src/tests/fixtures/stuff.ts
+      build $builddir/hi.txt: something_with_args <rootDir>/src/tests/fixtures/something.txt
+        message = hi
+      "
+    `);
+  });
+});
