@@ -51,7 +51,7 @@ export function makeNodeJsRuntimeDelegate(
   const cwdWithSeparator = cwdPath.toString();
 
   const configuredKame = kame.configure({
-    resolver(id, fromFilePath) {
+    resolve(id, fromFilePath) {
       if (fromFilePath.endsWith("/__kame-runtime-load.js")) {
         if (Path.isAbsolute(id) && fs.existsSync(id)) {
           return id;
